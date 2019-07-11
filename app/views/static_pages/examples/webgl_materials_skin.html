@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - materials - skin [Lee Perry-Smith]</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+	<body>
+
+		<div id="info">
+			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl skin rendering demo.<br/>
+			<a href="http://graphics.cs.williams.edu/data/meshes.xml#14" target="_blank" rel="noopener">Lee Perry-Smith</a> head.
+		</div>
+
+		<script type="module">
+
+
+
+				import * as THREE from '../build/three.module.js';
+							import Stats from './jsm/libs/stats.module.js';
+							import { GLTFLoader } from 'bugaboo';
+							import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+							import { RenderPass } from './jsm/postprocessing/RenderPass.js';
+							import { ShaderPass } from './jsm/postprocessing/ShaderPass.js';
+							import { BloomPass } from './jsm/postprocessing/BloomPass.js';
+							import { TexturePass } from './jsm/postprocessing/TexturePass.js';
+							import { SkinShaderAdvanced, SkinShaderBeckmann } from './jsm/shaders/SkinShader.js';
+							var statsEnabled = true;
+							var container, stats, loader;
+							var camera, scene, renderer;
+							var mesh;
+							var composer, composerUV1, composerUV2, composerUV3, composerBeckmann;
+							var directionalLight;
+							var mouseX = 0, mouseY = 0;
+							var targetX = 0, targetY = 0;
+							var windowHalfX = window.innerWidth / 2;
+							var windowHalfY = window.innerHeight / 2;
+							var firstPass = true;
+							init();
+							animate();
+							function init() {
+								container = document.createElement( 'div' );
+								document.body.appendChild( container );
+								camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 10000 );
+								camera.position.z = 900;
+								scene = new THREE.Scene();
+								scene.background = new THREE.Color( 0x050505 );
+								// LIGHTS
+								directionalLight = new THREE.DirectionalLight( 0xffeedd, 1.5 );
+								directionalLight.position.set( 1, 0.5, 1 );
+								scene.add( directionalLight );
+								directionalLight = new THREE.DirectionalLight( 0xddddff, 0.5 );
+								directionalLight.position.set( - 1, 0.5, - 1 );
+								scene.add( directionalLight );
+								// MATERIALS
+
+								// LOADER
+								loader = new GLTFLoader();
+								var materials = new THREE.MeshNormalMaterial();
+								loader.load( "models/gltf/LeePerrySmith/romans.glb", createScene)
+
+
+								function createScene( gltf ) {
+									mesh = gltf.scene.children[0];
+									scene.add(mesh);
+
+									mesh.scale.set(10, 10, 10);
+
+									var box = new THREE.Box3().setFromObject( mesh );
+                  console.log( box.min, box.max, box.getSize() );
+                    // scene.updateMatrixWorld(true);
+                    //  var position = new THREE.Vector3();
+                    //  position.getPositionFromMatrix( mesh.matrixWorld );
+                    //  alert(position.x + ',' + position.y + ',' + position.z);
+									  //    mesh.scale.set(100, 100, 100)
+								}
+								// RENDERER
+								renderer = new THREE.WebGLRenderer();
+								renderer.setPixelRatio( window.devicePixelRatio );
+								renderer.setSize( window.innerWidth, window.innerHeight );
+								renderer.autoClear = false;
+								container.appendChild( renderer.domElement );
+								// STATS
+								if ( statsEnabled ) {
+									stats = new Stats();
+									container.appendChild( stats.dom );
+								}
+								// EVENTS
+								document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+								// POSTPROCESSING
+
+								//
+
+
+								//
+
+								//
+
+							}
+
+							function createScene( geometry, materials) {
+                materials = new THREE.MeshNormalMaterial();
+
+								mesh = new THREE.Mesh( geometry, materials);
+
+								mesh.position.y = - 50;
+
+
+								scene.add( mesh );
+							}
+							function onDocumentMouseMove( event ) {
+								windowHalfX = window.innerWidth / 2;
+								windowHalfY = window.innerHeight / 2;
+								mouseX = ( event.clientX - windowHalfX );
+								mouseY = ( event.clientY + 6400 ) * -1;
+								console.log(event.clientY)
+							}
+							//
+
+
+
+
+							function animate() {
+								requestAnimationFrame( animate );
+								render();
+								if ( statsEnabled ) stats.update();
+							}
+							function render() {
+								targetX = mouseX * 0.001;
+								targetY = mouseY *  0.001;
+								if ( mesh ) {
+									mesh.rotation.y -= -0.05 * ( targetX - mesh.rotation.y );
+									mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
+
+
+
+								}
+								renderer.clear();
+
+
+								renderer.render( scene, camera );
+							}
+		</script>
+
+	</body>
+</html>
