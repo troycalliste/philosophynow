@@ -13,6 +13,14 @@
     scene,
     camera,
     myCanvas = document.getElementById('myCanvas');
+    var statsEnabled = true;
+
+            var directionalLight;
+            var mouseX = 0, mouseY = 0;
+            var targetX = 0, targetY = 0;
+            var windowHalfX = window.innerWidth / 2;
+            var windowHalfY = window.innerHeight / 2;
+
 
   //RENDERER
   renderer = new THREE.WebGLRenderer({
@@ -41,18 +49,26 @@
   loader.load('<%= asset_path 'romans.glb' %>', handle_load);
 
   var mesh;
-
+  document.addEventListener( 'mousemove', onDocumentMouseMove, false );
   function handle_load(gltf) {
 
       console.log(gltf);
       mesh = gltf.scene;
       console.log(mesh.children[0]);
       mesh.children[0].material = new THREE.MeshLambertMaterial();
+
   scene.add( mesh );
-      mesh.position.z = -10;
+      mesh.position.z = -20;
+
   }
 
+  function onDocumentMouseMove( event ) {
+               windowHalfX = window.innerWidth / 2;
+               windowHalfY = window.innerHeight / 2;
+               mouseX = ( event.clientX - windowHalfX );
+               mouseY = ( event.clientY - windowHalfY + 400);
 
+            }
   //RENDER LOOP
   render();
 
@@ -61,11 +77,16 @@
 
   function render() {
 
-      delta += 0.1;
 
-      if (mesh) {
 
-          mesh.rotation.y += 0.01;
+
+         targetX = mouseX * 0.001;
+         targetY = mouseY *  0.001;
+        if ( mesh ) {
+
+          mesh.rotation.y += 0.05 * ( targetX - mesh.rotation.y );
+          mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
+          // mesh.rotation.y += 0.01;
 
           //animation mesh
           // mesh.morphTargetInfluences[ 0 ] = Math.sin(delta) * 20.0;
@@ -75,5 +96,6 @@
 
     requestAnimationFrame(render);
   }
+
 
 </script>
