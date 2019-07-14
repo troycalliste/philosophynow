@@ -2,100 +2,186 @@
 
   <div id="info">
     <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl skin rendering demo.<br/>
-    <a href="http://graphics.cs.williams.edu/data/meshes.xml#14" target="_blank" rel="noopener">Lee Perry-Smith</a> head.
+    <a class="threedee" href="http://graphics.cs.williams.edu/data/meshes.xml#14" target="_blank" rel="noopener">Lee Perry-Smith</a> head.
+
   </div>
+
          <canvas id="myCanvas"></canvas>
+  <button id="myBtn">go</button>
+<div class="screen">
+<div class="loader">
+   <div class="loader__bar"></div>
+   <div class="loader__bar"></div>
+   <div class="loader__bar"></div>
+   <div class="loader__bar"></div>
+   <div class="loader__bar"></div>
+   <div class="loader__ball"></div>
+   <span class="loading">loading...</span>
+ </div>
+ </div>
+
+ <script>
+
+           // Draw canvas border for the first time.
+
+   var renderer,
+     scene,
+     camera,
+
+     myCanvas = document.getElementById('myCanvas');
+     var statsEnabled = true;
+
+             var directionalLight;
+             var mouseX = 0, mouseY = 0;
+             var targetX = 0, targetY = 0;
+             var windowHalfX = window.innerWidth / 2;
+             var windowHalfY = window.innerHeight / 2;
+
+
+   //RENDERER
+   renderer = new THREE.WebGLRenderer({
+     canvas: myCanvas,
+     antialias: true,
+     alpha: true
+   });
+   renderer.setClearColor(  0xff0000, 0 );
+   renderer.setPixelRatio(window.devicePixelRatio);
+   renderer.setSize(window.innerWidth, window.innerHeight);
+
+   //CAMERA
+   camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+   //SCENE
+   scene = new THREE.Scene();
+
+   //LIGHTS
+   var light = new THREE.AmbientLight(0xffffff, 0.5);
+   scene.add(light);
+
+   var light2 = new THREE.PointLight(0xffffff, 0.5);
+   scene.add(light2);
+
+   var loader = new THREE.GLTFLoader();
+
+   loader.load('<%= asset_path 'romans.glb' %>', handle_load);
+   loader.load('<%= asset_path 'tyrion.gltf' %>', second_load);
+
+
+   var manager = new THREE.LoadingManager(manager);
+   mesh = 0;
+   var mesh2;
+   document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+    function handle_load(gltf) {
+
+       console.log(gltf);
+       var x = document.getElementsByTagName("canvas");
+
+       mesh = gltf.scene;
+       console.log(mesh.children[0]);
+       mesh.children[0].material = new THREE.MeshLambertMaterial();
+
+       scene.add( mesh );
+       mesh.position.z = -20;
+       console.log('loaded')
+       x[0].style.display = "block";
+       window.setTimeout(loadingScreen, 6000);
+
+
+   }
 
 
 
-<script>
-  var renderer,
-    scene,
-    camera,
-    myCanvas = document.getElementById('myCanvas');
-    var statsEnabled = true;
-
-            var directionalLight;
-            var mouseX = 0, mouseY = 0;
-            var targetX = 0, targetY = 0;
-            var windowHalfX = window.innerWidth / 2;
-            var windowHalfY = window.innerHeight / 2;
 
 
-  //RENDERER
-  renderer = new THREE.WebGLRenderer({
-    canvas: myCanvas,
-    antialias: true
-  });
-  renderer.setClearColor(0x000000);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  //CAMERA
-  camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-  //SCENE
-  scene = new THREE.Scene();
-
-  //LIGHTS
-  var light = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(light);
-
-  var light2 = new THREE.PointLight(0xffffff, 0.5);
-  scene.add(light2);
-
-  var loader = new THREE.GLTFLoader();
-
-  loader.load('<%= asset_path 'romans.glb' %>', handle_load);
-
-  var mesh;
-  document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-  function handle_load(gltf) {
+   function second_load(gltf) {
 
       console.log(gltf);
-      mesh = gltf.scene;
-      console.log(mesh.children[0]);
-      mesh.children[0].material = new THREE.MeshLambertMaterial();
-
-  scene.add( mesh );
-      mesh.position.z = -20;
-
+      mesh2 = gltf.scene;
+      mesh2.children[0].material = new THREE.MeshLambertMaterial();
+      scene.add( mesh2 );
+      mesh2.position.z = -20;
+      mesh2.position.x = 30;
   }
 
-  function onDocumentMouseMove( event ) {
-               windowHalfX = window.innerWidth / 2;
-               windowHalfY = window.innerHeight / 2;
-               mouseX = ( event.clientX - windowHalfX );
-               mouseY = ( event.clientY - windowHalfY + 400);
+ function loadingScreen() {
+              var y = document.getElementsByClassName("loader");
+              y[0].style.display = "none";
+              console.log("go")
 
-            }
-  //RENDER LOOP
-  render();
+           }
 
-  var delta = 0;
-  var prevTime = Date.now();
+   function onDocumentMouseMove( event ) {
 
-  function render() {
+                mouseX = ( event.clientX - windowHalfX );
+                mouseY = ( event.clientY - windowHalfY + 400);
 
-
+             }
+   //RENDER LOOP
 
 
-         targetX = mouseX * 0.001;
-         targetY = mouseY *  0.001;
-        if ( mesh ) {
+   function onWindowResize() {
 
-          mesh.rotation.y += 0.05 * ( targetX - mesh.rotation.y );
-          mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
-          // mesh.rotation.y += 0.01;
+ 				camera.aspect = window.innerWidth / window.innerHeight;
+ 				camera.updateProjectionMatrix();
+ 				renderer.setSize( window.innerWidth, window.innerHeight );
+ 			}
 
-          //animation mesh
-          // mesh.morphTargetInfluences[ 0 ] = Math.sin(delta) * 20.0;
-      }
+   var delta = 0;
+   var prevTime = Date.now();
+   var i = 0;
 
-    renderer.render(scene, camera);
-
-    requestAnimationFrame(render);
-  }
+       render();
+   function render() {
 
 
-</script>
+
+
+          targetX = mouseX * 0.001;
+          targetY = mouseY *  0.001;
+         if ( mesh ) {
+
+           mesh.rotation.y += 0.05 * ( targetX - mesh.rotation.y );
+           mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
+
+           // mesh.rotation.y += 0.01;
+           // mesh.position.x += .01;
+           //animation mesh
+           // mesh.morphTargetInfluences[ 0 ] = Math.sin(delta) * 20.0;
+
+          }
+
+
+
+
+
+   renderer.render(scene, camera);
+
+
+
+     requestAnimationFrame(render);
+
+
+   }
+   window.addEventListener( 'resize', onWindowResize, false );
+   // window.addEventListener('resize', resizeCanvas, false);
+   // resizeCanvas();
+   // function resizeCanvas() {
+   //         myCanvas.width = window.innerWidth;
+   //         myCanvas.height = window.innerHeight;
+   //
+   //     }
+   document.getElementById("myBtn").addEventListener("click", sliderAni, false);
+   function sliderAni() {
+       for(var i=0; i < 20; i += .01) {
+       (function(i) {
+        setTimeout(function() {
+         mesh.position.x = i;
+      }, 500 * i); // <-- You need to multiply by i here.
+       })(i);
+     }
+   }
+
+
+
+
+ </script>
